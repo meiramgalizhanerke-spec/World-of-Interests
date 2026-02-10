@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paint Canvas</title>
+<style>
+    body {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #f0f0f0;
+        font-family: Arial, sans-serif;
+    }
+    h1 {
+        margin: 20px;
+        color: #333;
+    }
+    canvas {
+        border: 2px solid #333;
+        background: white;
+        cursor: crosshair;
+    }
+    .controls {
+        margin: 10px;
+    }
+    .controls label, .controls button {
+        margin-right: 10px;
+    }
+    #tools button {
+        font-size: 20px;
+        padding: 5px 10px;
+        margin-right: 5px;
+        cursor: pointer;
+        border: 1px solid #999;
+        background: #eee;
+        border-radius: 5px;
+    }
+    #tools button.active {
+        border-color: #333;
+        background: #ddd;
+    }
+</style>
+</head>
+<body>
+<h1>Бояу платно</h1>
+<div class="controls">
+    <label>Түсі: <input type="color" id="colorPicker" value="#ff0000"></label>
+    <label>Қалыңдығы: <input type="range" id="sizePicker" min="1" max="50" value="5"></label>
+    
+    <!-- Батырмалар арқылы құрал таңдау -->
+    <div id="tools">
+        <button data-tool="brushRound" class="active">🖌️</button>
+        <button data-tool="brushSquare">✏️</button>
+        <button data-tool="spray">💨</button>
+        <button data-tool="eraser">🧽</button>
+        <button data-tool="line">➖</button>
+        <button data-tool="rectangle">⬛</button>
+        <button data-tool="circle">⚪</button>
+    </div>
+
+    <button id="clearBtn">Тазалау</button>
+</div>
+
+<canvas id="paintCanvas" width="800" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById('paintCanvas');
+const ctx = canvas.getContext('2d');
+let painting = false;
+let startX = 0;
+let startY = 0;
+
+let brushColor = document.getElementById('colorPicker').value;
+let brushSize = document.getElementById('sizePicker').value;
+let toolType = 'brushRound';
+
+// Батырмалар арқылы құрал таңдау
+const toolButtons = document.querySelectorAll('#tools button');
+toolButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        toolType = btn.dataset.tool;
+        toolButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+
+// Мишка оқиғалары
+canvas.addEventListener('mousedown', (e) => {
+    painting = true;
+    startX = e.offsetX;
+    startY = e.offsetY;
+    if(toolType.includes('brush') || toolType === 'spray' || toolType === 'eraser') draw(e);
+});
+canvas.addEventListener('mouseup', (e) => {
+    if(!painting) return;
+    if(toolType === 'line') drawLine(startX, startY, e.offsetX, e.offsetY);
+    if(toolType === 'rectangle') drawRectangle(startX, startY, e.offsetX, e.offsetY);
+    if(toolType === 'circle') drawCircle(startX, startY, e.offsetX, e.offsetY);
+    painting = false;
+    ctx.beginPath();
+});
+canvas.addEventListener('mousemove', (e) => {
+    if(toolType.includes('brush') || toolType === 'spray' || toolType === 'eraser') draw(e);
+});
+
+// Функциялар
+function draw(e){
+    if(!painting) return;
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = toolType === 'brushSquare' ? 'butt' : 'round';
+    ctx.strokeStyle = toolType === 'eraser' ? 'white' : brushColor;
+
+    if(toolType === 'spray'){
+        for(let i=0;i<brushSize*2;i++){
+            const offsetX = e.offsetX + (Math.random()-0.5)*brushSize*2;
+            const offsetY = e.offsetY + (Math.random()-0.5)*brushSize*2;
+            ctx.fillStyle = brushColor;
+            ctx.fillRect(offsetX, offsetY, 1, 1);
+        }
+        return;
+    }
+
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX, e.offsetY);
+}
+
+function drawLine(x1,y1,x2,y2){
+    ctx.beginPath();
+    ctx.strokeStyle = brushColor;
+    ctx.lineWidth = brushSize;
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function drawRectangle(x1,y1,x2,y2){
+    ctx.beginPath();
+    ctx.strokeStyle = brushColor;
+    ctx.lineWidth = brushSize;
+    ctx.strokeRect(Math.min(x1,x2), Math.min(y1,y2), Math.abs(x2-x1), Math.abs(y2-y1));
+    ctx.closePath();
+}
+
+function drawCircle(x1,y1,x2,y2){
+    ctx.beginPath();
+    ctx.strokeStyle = brushColor;
+    ctx.lineWidth = brushSize;
+    const radius = Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+    ctx.arc(x1, y1, radius, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.closePath();
+}
+
+// Контролдар
+document.getElementById('colorPicker').addEventListener('change',(e)=>{ brushColor=e.target.value; });
+document.getElementById('sizePicker').addEventListener('input',(e)=>{ brushSize=e.target.value; });
+document.getElementById('clearBtn').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); });
+</script>
+</body>
+</html>

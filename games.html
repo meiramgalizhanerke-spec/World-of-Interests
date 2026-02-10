@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<title>🎮 Ойындар</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #43cea2, #185a9d);
+    color: white;
+    text-align: center;
+
+    display: flex;          /* экран бойынша центр */
+    flex-direction: column;
+    align-items: center;    /* көлденең ортасы */
+    justify-content: center;/* тік ортасы */
+    min-height: 100vh;      /* толық экран биіктігі */
+}
+
+header {
+    background: #0a3d62;
+    padding: 20px;
+    border-bottom: 2px solid #16216a;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+h1,h2 {
+    margin:10px 0;
+}
+
+button {
+    display: block;
+    width: 60%;
+    margin: 15px auto;
+    padding: 12px;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #1e3799;
+    color: white;
+    transition: 0.3s;
+}
+button:hover {
+    background-color: #16216a;
+}
+
+canvas {
+    background:#000;
+    border:2px solid #00ffcc;
+    display:block;
+    margin: 10px auto;
+}
+
+/* Tic-Tac-Toe стильдер */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 80px);
+    gap: 5px;
+    margin: 10px auto;
+}
+
+.cell {
+    width: 80px;
+    height: 80px;
+    background: #222;
+    display: grid;
+    place-items: center;    /* X/O толық ортасында */
+    font-size: 50px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.2s;
+    user-select: none;
+    box-sizing: border-box;
+}
+.cell:hover {
+    background:#1e3799;
+}
+
+#ttt {margin-top:10px; font-size:18px;}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🎮 Ойындар</h1>
+<p>Саған ұнайтын ойын таңда</p>
+</header>
+
+<!-- Snake -->
+<div>
+<h2>🐍 Snake</h2>
+<p>Ұпай: <span id="score">0</span></p>
+<canvas id="snake" width="400" height="400"></canvas>
+<button onclick="startSnake()">▶ START</button>
+<button onclick="restartSnake()">🔁 RESTART</button>
+</div>
+
+<!-- Tic-Tac-Toe -->
+<div>
+<h2>❌⭕ Tic-Tac-Toe</h2>
+<div class="grid" id="grid"></div>
+<p id="ttt"></p>
+<button onclick="resetTTT()">Қайта бастау</button>
+</div>
+
+<script>
+// ==== SNAKE ====
+const canvas = document.getElementById("snake");
+const ctx = canvas.getContext("2d");
+const box = 20;
+let snake, dir, food, score;
+let snakeGame = null;
+let running = false;
+
+document.addEventListener("keydown", e=>{
+    if(!running) return;
+    if(e.key==="ArrowLeft" && dir!=="RIGHT") dir="LEFT";
+    if(e.key==="ArrowUp" && dir!=="DOWN") dir="UP";
+    if(e.key==="ArrowRight" && dir!=="LEFT") dir="RIGHT";
+    if(e.key==="ArrowDown" && dir!=="UP") dir="DOWN";
+});
+
+function initSnake(){
+    snake = [{x:200,y:200}];
+    dir="RIGHT"; score=0;
+    food=randomFood();
+    document.getElementById("score").innerText=score;
+    drawSnake();
+}
+
+function randomFood(){
+    return {x:Math.floor(Math.random()*20)*box, y:Math.floor(Math.random()*20)*box};
+}
+
+function startSnake(){
+    if(running) return;
+    running = true;
+    snakeGame = setInterval(drawSnake,120);
+}
+
+function restartSnake(){
+    clearInterval(snakeGame);
+    running=false;
+    initSnake();
+}
+
+function drawBoard(){
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,400,400);
+}
+
+function drawSnake(){
+    drawBoard();
+    snake.forEach((s,i)=>{
+        ctx.fillStyle = i===0?"#00ffcc":"lime";
+        ctx.fillRect(s.x,s.y,box,box);
+    });
+    ctx.fillStyle="red";
+    ctx.fillRect(food.x,food.y,box,box);
+
+    let headX=snake[0].x;
+    let headY=snake[0].y;
+
+    if(dir==="LEFT") headX-=box;
+    if(dir==="RIGHT") headX+=box;
+    if(dir==="UP") headY-=box;
+    if(dir==="DOWN") headY+=box;
+
+    if(headX<0) headX=380;
+    if(headX>=400) headX=0;
+    if(headY<0) headY=380;
+    if(headY>=400) headY=0;
+
+    let newHead={x: headX, y: headY};
+
+    if(headX===food.x && headY===food.y){
+        score++;
+        document.getElementById("score").innerText=score;
+        food=randomFood();
+    } else {snake.pop();}
+
+    if(collision(newHead)){
+        clearInterval(snakeGame);
+        running=false;
+        alert("Game Over 😵 Ұпай: "+score);
+        return;
+    }
+
+    snake.unshift(newHead);
+}
+
+function collision(head){
+    return snake.some(s=>s.x===head.x && s.y===head.y);
+}
+
+initSnake();
+
+// ==== TIC-TAC-TOE ====
+let turn="X", cells=[], end=false;
+const grid=document.getElementById("grid");
+const info=document.getElementById("ttt");
+
+for(let i=0;i<9;i++){
+    let d=document.createElement("div");
+    d.className="cell";
+    d.onclick=()=>play(i,d);
+    grid.appendChild(d);
+    cells.push(d);
+}
+
+function play(i,d){
+    if(d.innerText||end) return;
+    d.innerText=turn;
+    checkTTT();
+    turn=turn==="X"?"O":"X";
+}
+
+function checkTTT(){
+    const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    w.forEach(a=>{
+        if(cells[a[0]].innerText &&
+           cells[a[0]].innerText===cells[a[1]].innerText &&
+           cells[a[1]].innerText===cells[a[2]].innerText){
+            info.innerText="Жеңді: "+cells[a[0]].innerText;
+            end=true;
+        }
+    });
+}
+
+function resetTTT(){
+    cells.forEach(c=>c.innerText="");
+    end=false;
+    turn="X";
+    info.innerText="";
+}
+</script>
+
+</body>
+</html>
+

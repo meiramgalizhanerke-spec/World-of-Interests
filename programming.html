@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python IDE Онлайн</title>
+<link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+<script defer src="https://pyscript.net/latest/pyscript.js"></script>
+<style>
+body { 
+    font-family: 'Courier New', monospace; 
+    background: linear-gradient(to right, #43cea2, #185a9d); /* градиент хобби стилінде */
+    color: #d4d4d4; 
+    padding: 20px; 
+}
+
+header { 
+    text-align: center; 
+    background: #0a3d62; 
+    color: #00ffcc; /* неонды тақырып */
+    padding: 30px 20px; 
+    font-size: 2em; 
+    font-weight: bold; 
+    border-radius: 8px; 
+    text-shadow: 0 0 10px #00ffcc;
+    margin-bottom: 20px;
+}
+
+h2 { 
+    color: #ffcc00; 
+    margin-top: 40px; 
+}
+
+textarea { 
+    width: 100%; 
+    height: 200px; 
+    background: rgba(0,0,0,0.6); /* түнгі стиль */
+    color: #d4d4d4; 
+    border: none; 
+    border-radius: 8px; 
+    padding: 10px; 
+    font-size: 16px; 
+    resize: vertical; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+button { 
+    padding: 12px 25px; 
+    margin: 15px 0; 
+    font-size: 16px; 
+    cursor: pointer; 
+    border-radius: 8px; 
+    border: none; 
+    background: #1e3799; 
+    color: #00ffcc; 
+    font-weight: bold;
+    transition: 0.3s;
+}
+button:hover { 
+    background: #16216a; 
+    transform: scale(1.05);
+}
+
+#output { 
+    background: rgba(0,0,0,0.6); 
+    padding: 15px; 
+    border-radius: 8px; 
+    min-height: 50px; 
+    margin-top: 10px; 
+    white-space: pre-wrap; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.example-block { 
+    background: rgba(0,0,0,0.5); 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin: 10px 0; 
+    cursor: pointer; 
+    transition: transform 0.3s, background 0.3s; 
+    color: #00ffcc;
+}
+.example-block:hover { 
+    transform: scale(1.03); 
+    background: rgba(0,0,0,0.7); 
+}
+</style>
+</head>
+<body>
+
+<header>Python IDE Онлайн</header>
+
+<h2>Python кодын жазып іске қосу</h2>
+<p>Кодты textarea-ға жазып, "Іске қосу" батырмасын басыңыз:</p>
+<textarea id="codeArea">
+# Мұнда Python кодын жаз
+print("Сәлем, Теплый светлячок!")
+</textarea>
+
+<button id="runBtn">Іске қосу</button>
+
+<div id="output"></div>
+
+<h2>Python мысалдары (бассаң textarea-қа көшеді)</h2>
+<div class="example-block" onclick="document.getElementById('codeArea').value='print(\"Сәлем әлем!\")'">Простой print</div>
+<div class="example-block" onclick="document.getElementById('codeArea').value='for i in range(5):\n    print(i)'">Цикл for</div>
+<div class="example-block" onclick="document.getElementById('codeArea').value='def greet(name):\n    print(f\"Сәлем, {name}!\")\ngreet(\"Теплый светлячок\")'">Функция greet</div>
+
+<py-script>
+from js import document
+import sys
+import io
+
+def run_code_py():
+    document.getElementById("output").innerHTML = ""  # бұрынғы нәтижені тазалау
+    code = document.getElementById("codeArea").value
+    old_stdout = sys.stdout
+    redirected_output = io.StringIO()
+    sys.stdout = redirected_output
+    try:
+        exec(code, {})
+        result = redirected_output.getvalue()
+    except Exception as e:
+        result = str(e)
+    sys.stdout = old_stdout
+    document.getElementById("output").innerHTML = result
+
+document.getElementById("runBtn").addEventListener("click", run_code_py)
+</py-script>
+
+</body>
+</html>

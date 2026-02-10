@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Gallery</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    background: #ff5722;
+    color: white;
+    padding: 30px 20px;
+    font-size: 2em;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+h2 {
+    color: #ff5722;
+    margin-top: 30px;
+}
+
+.upload {
+    margin: 20px 0;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.photo {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.photo img {
+    width: 100%;
+    display: block;
+    transition: transform 0.3s;
+}
+
+.photo:hover img {
+    transform: scale(1.1);
+}
+
+.caption {
+    position: absolute;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    width: 100%;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 14px;
+}
+
+/* Lightbox */
+#lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+#lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>Photo Gallery</header>
+
+<h2>Фото қосу</h2>
+<div class="upload">
+    <input type="file" id="photoInput" accept="image/*">
+</div>
+
+<h2>Суреттер галереясы</h2>
+
+<div class="gallery" id="gallery">
+    <div class="photo">
+        <img src="./загрузка.jpg">
+        <div class="caption">Сурет 1</div>
+    </div>
+    <div class="photo">
+        <img src="./обои расвет, закат_.jpg">
+        <div class="caption">Сурет 2</div>
+    </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox">
+    <img id="lightbox-img">
+</div>
+
+<script>
+const gallery = document.getElementById("gallery");
+const photoInput = document.getElementById("photoInput");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+// Lightbox функциясы
+function enableLightbox(img) {
+    img.addEventListener("click", () => {
+        lightbox.style.display = "flex";
+        lightboxImg.src = img.src;
+    });
+}
+
+// Бар фотоларға
+document.querySelectorAll(".photo img").forEach(enableLightbox);
+
+// Фото қосу
+photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    const photoDiv = document.createElement("div");
+    photoDiv.className = "photo";
+
+    photoDiv.innerHTML = `
+        <img src="${url}">
+        <div class="caption">${file.name}</div>
+    `;
+
+    gallery.appendChild(photoDiv);
+    enableLightbox(photoDiv.querySelector("img"));
+});
+
+// Lightbox жабу
+lightbox.addEventListener("click", () => {
+    lightbox.style.display = "none";
+});
+</script>
+
+</body>
+</html>
+

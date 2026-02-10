@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Fun</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    background: #1db954;
+    color: white;
+    padding: 30px 20px;
+    font-size: 2em;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+h2 {
+    color: #1db954;
+    margin-top: 30px;
+}
+
+#search {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+}
+
+.upload {
+    margin: 20px 0;
+}
+
+.track {
+    background: #1e1e1e;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+
+audio {
+    width: 100%;
+    margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>Music Fun</header>
+
+<input type="text" id="search" placeholder="🎵 Ән немесе орындаушыны ізде...">
+
+<div class="upload">
+    <h2>Өз әніңді қос</h2>
+    <input type="file" id="fileInput" accept="audio/*">
+</div>
+
+<h2>Плейлист</h2>
+
+<div id="playlist">
+
+    <div class="track">
+        <p>Нервы – Самый Дорогой Человек</p>
+        <audio controls>
+            <source src="./Нервы - Самый Дорогой Человек.mp3">
+        </audio>
+    </div>
+
+    <div class="track">
+        <p>Lana Del Rey – Diet Mountain Dew</p>
+        <audio controls>
+            <source src="./Lana Del Rey - Diet Mountain Dew.mp3">
+        </audio>
+    </div>
+
+    <div class="track"> 
+        <p>Song 4 – Sadraddin </p> 
+        <audio controls> 
+            <source src="./Sadraddin feat. IL'HAN - Aman bolşy süigenım.mp3"> 
+         </audio> 
+   </div>
+
+</div>
+
+<script>
+const search = document.getElementById("search");
+const tracksContainer = document.getElementById("playlist");
+const fileInput = document.getElementById("fileInput");
+
+search.addEventListener("input", () => {
+    const value = search.value.toLowerCase();
+    const tracks = document.querySelectorAll(".track");
+
+    tracks.forEach(track => {
+        track.style.display = track.innerText.toLowerCase().includes(value)
+            ? "block"
+            : "none";
+    });
+});
+
+fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    const track = document.createElement("div");
+    track.className = "track";
+
+    track.innerHTML = `
+        <p>${file.name}</p>
+        <audio controls>
+            <source src="${url}">
+        </audio>
+    `;
+
+    tracksContainer.appendChild(track);
+});
+</script>
+
+</body>
+</html>
